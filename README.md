@@ -1,6 +1,6 @@
 # Pomodoro Timer
 
-<img src="https://github.com/WWWonderer/Pomodoro/blob/main/screenshot.png" alt="screenshot" width="500"/>
+<img src="https://github.com/WWWonderer/Pomodoro/blob/main/screenshot.png" alt="screenshot" width="800"/>
 
 This is a pomodoro timer that automatically registers and visualize uninterrupted working times > 1 minute. Historical data can also be pulled and viewed.
 
