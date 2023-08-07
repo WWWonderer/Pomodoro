@@ -20,7 +20,7 @@ You can bundle all dependencies and create a single executable file with the hel
 ```
 pip install pyinstaller
 cd src
-pyinstaller --onefile --windowed -i ../resources/tomato.ico -add-data "../resources;resources" pomodoro.py
+pyinstaller --onefile --windowed -i ../resources/tomato.ico --add-data "../resources;resources" pomodoro.py
 ```
 
 ## Data format
