@@ -116,7 +116,11 @@ class App(customtkinter.CTk):
 
         if input == "p" or input == "P":
             if self.plot_mode == "weekly":
-                self._update_charts(self.chart_time - timedelta(days=7))
+                prev_week_day = self.chart_time - timedelta(days=7)
+                # if a week is spanning 2 months, use a day in the new month (otherwise new month data won't be loaded)
+                if self._span_2_months_check(prev_week_day):
+                    prev_week_day = datetime.strptime(str(self._get_all_dates_of_week(prev_week_day)[-1]), "%Y.%m%d")
+                self._update_charts(prev_week_day)
             else:
                 prev_month = 12 if self.chart_time.month == 1 else self.chart_time.month - 1
                 year = self.chart_time.year - 1 if self.chart_time.month == 1 else self.chart_time.year
