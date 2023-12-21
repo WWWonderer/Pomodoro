@@ -491,7 +491,7 @@ class App(customtkinter.CTk):
         day_count = 6
         for i, time in enumerate(reversed(self.weekly_end_times_chart - self.weekly_start_times_chart)):
             # new day 
-            if time == 0:
+            if self.weekly_end_times_chart[len(self.weekly_end_times_chart) - i - 1] % 1 != 0:
                 day = self._convert_calendar_date_to_weekday(self.weekly_end_times_chart[len(self.weekly_end_times_chart) - i - 1])
                 while day_count > day:
                     working_times.insert(0, 0)
