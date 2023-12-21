@@ -18,7 +18,7 @@ After installing the requirements, just run ```src/pomodoro.py```, or to create 
 You can bundle all dependencies and create a single executable file with the help of pyinstaller:
 
 ```
-pip install pyinstaller
+pip install pyinstaller==5.13.0
 cd src
 pyinstaller --onefile --windowed -i ../resources/tomato.ico --add-data "../resources;resources" pomodoro.py
 ```
