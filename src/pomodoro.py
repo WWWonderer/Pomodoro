@@ -555,7 +555,7 @@ class App(customtkinter.CTk):
         day_count = total_days
         for i, time in enumerate(reversed(self.monthly_end_times_chart -self.monthly_start_times_chart)):
             # new day
-            if time == 0:
+            if self.monthly_end_times_chart[len(self.monthly_end_times_chart) - i - 1] % 1 != 0:
                 day = round(((self.monthly_start_times_chart[len(self.monthly_start_times_chart) - i - 1] * 100) % 1) * 100)
                 while day_count > day:
                     working_times.insert(0, 0)
