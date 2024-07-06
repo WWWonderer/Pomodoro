@@ -1,2 +1,5 @@
-env
+venv
 src/__pycache__
+src/build
+src/dist
+src/pomodoro.spec

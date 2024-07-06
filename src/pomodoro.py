@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from PIL import Image, ImageEnhance
+import threading
 import time
 import winsound
 
@@ -31,6 +32,8 @@ class App(customtkinter.CTk):
         self.current_pomodoro_session = 0
         self.pause = True # False or True
         self.data_folder = os.path.join(os.getenv("APPDATA"), "Pomodoro")
+        self.lock = threading.Lock()
+        self.scheduled_updates = []
 
         # configure window
         self.iconbitmap(False, self._resource_path("resources\\tomato.ico"))
@@ -211,10 +214,13 @@ class App(customtkinter.CTk):
             else:
                 self.timer_btn.configure(fg_color = ["#479ca6", "#20484d"], hover_color = ["#20464a", "#102426"], text=self._get_formatted_time(self.time_remaining))
 
-    def _get_sleep_time(self):
-        time_diff = (self.last_update_time - self.last_click_time).total_seconds()
-        if time_diff % 1 == 0: return 1
-        return time_diff - floor(time_diff)
+    def _get_remaining_time(self):
+        # timeline below:
+        # |______|____|__________|
+        # u      c    u          u
+        # u: update, c: click, we want to get the second interval or the remaining time within the second
+        time_diff = (self.last_click_time - self.last_update_time).total_seconds()
+        return 1 - time_diff % 1
 
     def _next(self):
         now = datetime.now()
@@ -224,24 +230,23 @@ class App(customtkinter.CTk):
         winsound.PlaySound(None, winsound.SND_ASYNC)
 
     def click_timer(self):
-        now = datetime.now()
-        
-        if self.timer_btn._text == "next":
-            self._next()
-            return
-        
-        self.pause = not self.pause
-        if self.pause:
-            if self.mode == "study":
-                self._register_time_and_update_chart()
-        else:
-            time.sleep(self._get_sleep_time())
-            self._update_timer()
-            if self.mode == "study":
-                self.last_start_time = now
-        
-        self.last_click_time = now
-
+        with self.lock:
+            now = datetime.now()
+            if self.timer_btn._text == "next":
+                self._next()
+                return
+            self.pause = not self.pause
+            if self.pause:
+                if self.mode == "study":
+                    self._register_time_and_update_chart()
+            else:
+                remaining_time = self._get_remaining_time()
+                self.scheduled_updates.append(now)
+                self.after(int(remaining_time*1000), self._update_timer, 1)
+                if self.mode == "study":
+                    self.last_start_time = now
+            
+            self.last_click_time = now
 
     def _register_time_and_update_chart(self):
         now = datetime.now()
@@ -317,12 +322,15 @@ class App(customtkinter.CTk):
         self.report1.configure(image=customtkinter.CTkImage(self.img1, size=(300,215)))
         self.report2.configure(image=customtkinter.CTkImage(self.img2, size=(300,215)))
 
-    def _update_timer(self):
+    def _update_timer(self, time_passed):
         now = datetime.now()
+        if self.scheduled_updates:
+            self.scheduled_updates.pop(0)
+            if self.scheduled_updates:
+                return
         if self.pause:
             return
-        
-        self.time_remaining -= 1
+        self.time_remaining -= time_passed
         if self.time_remaining <= 0:
             if self.mode == "study": 
                 self._register_time_and_update_chart()
@@ -334,7 +342,8 @@ class App(customtkinter.CTk):
             
         self.timer_btn.configure(text=self._get_formatted_time(self.time_remaining))
         self.last_update_time = now
-        self.after(1000, self._update_timer)
+        self.scheduled_updates.append(now)
+        self.after(1000, self._update_timer, 1)
 
     def _get_formatted_time(self, time: int):
         min = int(time / 60)
@@ -602,6 +611,7 @@ if __name__ == "__main__":
         app.destroy()
     
     app = App()
+    app.resizable(False, False)
     app.protocol("WM_DELETE_WINDOW", on_close)
     app.mainloop()
 

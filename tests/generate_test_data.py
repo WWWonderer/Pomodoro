@@ -1,4 +1,5 @@
 # Can be used to generate test data for GUI's data visualization
+# Go to the generated year in GUI by clicking on the displayed graphs
 
 import random
 from datetime import datetime, timedelta
